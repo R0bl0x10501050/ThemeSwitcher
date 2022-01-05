@@ -142,18 +142,21 @@ NewButton.Click:Connect(function()
 		
 		script.Parent:WaitForChild('ScreenGui'):WaitForChild('ScrollingFrame').Parent = Widget
 		
-		Widget.ScrollingFrame.TextButton.MouseButton1Click:Connect(function()
+		Widget.ScrollingFrame.AddUpdate.MouseButton1Click:Connect(function()
 			local newTheme = {
 				colors = {},
 				name = "Theme #" .. math.random(1, 1e4)
 			}
 			
+			Prompt.Frame.Prompt.Text = "What is the name of this theme?"
 			Prompt.Frame.TextBox.Text = ""
 			Prompt.Enabled = true
 			
 			local connection
 			connection = Prompt.Frame.TextButton.MouseButton1Click:Connect(function()
 				Prompt.Enabled = false
+				connection:Disconnect()
+				
 				if Prompt.Frame.TextBox.Text ~= "" then
 					newTheme.name = Prompt.Frame.TextBox.Text
 					
@@ -176,7 +179,6 @@ NewButton.Click:Connect(function()
 							if dataslot.name == newTheme.name then
 								oldData[i].colors = newTheme.colors
 								plugin:SetSetting('studioThemes', oldData)
-								return true
 							end
 						end
 						table.insert(oldData, newTheme)
@@ -185,6 +187,77 @@ NewButton.Click:Connect(function()
 					
 					task.wait() -- Wait for :SetSetting()
 					refreshList()
+				end
+			end)
+		end)
+		
+		Widget.ScrollingFrame.Delete.MouseButton1Click:Connect(function()
+			Prompt.Frame.Prompt.Text = "What is the name of the theme?"
+			Prompt.Frame.TextBox.Text = ""
+			Prompt.Enabled = true
+			
+			local connection
+			connection = Prompt.Frame.TextButton.MouseButton1Click:Connect(function()
+				Prompt.Enabled = false
+				connection:Disconnect()
+				
+				if Prompt.Frame.TextBox.Text ~= "" then
+					local name = Prompt.Frame.TextBox.Text
+					
+					pcall(function()
+						local oldData = plugin:GetSetting('studioThemes')
+						for i, v in ipairs(oldData) do
+							if v.name == name then
+								table.remove(oldData, i)
+							end
+						end
+						plugin:SetSetting('studioThemes', oldData)
+					end)
+					
+					task.wait() -- Wait for :SetSetting()
+					refreshList()
+				end
+			end)
+		end)
+		
+		Widget.ScrollingFrame.Rename.MouseButton1Click:Connect(function()
+			Prompt.Frame.Prompt.Text = "What is the name of the theme?"
+			Prompt.Frame.TextBox.Text = ""
+			Prompt.Enabled = true
+			
+			local connection
+			connection = Prompt.Frame.TextButton.MouseButton1Click:Connect(function()
+				Prompt.Enabled = false
+				connection:Disconnect()
+				
+				if Prompt.Frame.TextBox.Text ~= "" then
+					local oldName = Prompt.Frame.TextBox.Text
+					
+					Prompt.Frame.Prompt.Text = "What is the new name of the theme?"
+					Prompt.Frame.TextBox.Text = ""
+					Prompt.Enabled = true
+					
+					connection = Prompt.Frame.TextButton.MouseButton1Click:Connect(function()
+						Prompt.Enabled = false
+						connection:Disconnect()
+						
+						if Prompt.Frame.TextBox.Text ~= "" then
+							local newName = Prompt.Frame.TextBox.Text
+							
+							pcall(function()
+								local oldData = plugin:GetSetting('studioThemes')
+								for i, v in ipairs(oldData) do
+									if v.name == oldName then
+										oldData[i].name = newName
+									end
+								end
+								plugin:SetSetting('studioThemes', oldData)
+							end)
+							
+							task.wait() -- Wait for :SetSetting()
+							refreshList()
+						end
+					end)
 				end
 			end)
 		end)
